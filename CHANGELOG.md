@@ -4,6 +4,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [staging]
 
+## [1.1.1] - 2026-01-13 (96.2%)
+### Fixed
+- Removed a log when generating statements
+
 ## [1.1.0] - 2026-01-13 (96.2%)
 ### Added
 - Added the expected callback and headers check to the expected block.

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"testing"
 
@@ -49,7 +48,6 @@ func GenerateRequest(testCase *TestCase) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println(string(reqJson))
 
 	var req *http.Request
 	if testCase.RequestReader != nil {
