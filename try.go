@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"io"
+	"log"
 	"net/http"
 	"testing"
+
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
 )
 
 type TestCase struct {
@@ -37,6 +39,8 @@ type ExpectedResponse struct {
 	BodyParts        []string
 	BodyPartMissing  string
 	BodyPartsMissing []string
+	Headers          map[string]string
+	ExpectedCallBack func(res *HijackableResponseRecorder)
 }
 
 func GenerateRequest(testCase *TestCase) (*http.Request, error) {
@@ -45,6 +49,7 @@ func GenerateRequest(testCase *TestCase) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Println(string(reqJson))
 
 	var req *http.Request
 	if testCase.RequestReader != nil {
@@ -99,6 +104,10 @@ func ValidateResults(t *testing.T, test *TestCase, res *HijackableResponseRecord
 		fmt.Println(res.Body.String())
 	}
 
+	if test.Expected.ExpectedCallBack != nil {
+		test.Expected.ExpectedCallBack(res)
+	}
+
 	if res.Code != 0 {
 		assert.Equal(t, test.Expected.StatusCode, res.Code)
 	}
@@ -118,6 +127,12 @@ func ValidateResults(t *testing.T, test *TestCase, res *HijackableResponseRecord
 	if len(test.Expected.BodyPartsMissing) > 0 {
 		for _, expectedText := range test.Expected.BodyPartsMissing {
 			assert.NotContains(t, res.Body.String(), expectedText)
+		}
+	}
+
+	if test.Expected.Headers != nil {
+		for headerKey, headerValue := range test.Expected.Headers {
+			assert.Equal(t, headerValue, res.Header().Get(headerKey))
 		}
 	}
 }

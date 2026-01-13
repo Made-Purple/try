@@ -1,11 +1,12 @@
 package try
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"strings"
 	"testing"
+
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
 )
 
 type user struct {
@@ -60,6 +61,7 @@ func TestExecuteRequestAdditional(t *testing.T) {
 }
 
 func TestValidateResults(t *testing.T) {
+	expectedCallbackCalled := false
 	tc := &TestCase{
 		TestName: "Can create User",
 		Request: Request{
@@ -72,6 +74,9 @@ func TestValidateResults(t *testing.T) {
 			BodyParts:        []string{"Not Found"},
 			BodyPartMissing:  "This is Not Returned",
 			BodyPartsMissing: []string{"This is Not Returned"},
+			ExpectedCallBack: func(res *HijackableResponseRecorder) {
+				expectedCallbackCalled = true
+			},
 		},
 	}
 
@@ -84,6 +89,8 @@ func TestValidateResults(t *testing.T) {
 	res := ExecuteRequest(e, req)
 
 	ValidateResults(t, tc, res)
+
+	assert.True(t, expectedCallbackCalled)
 }
 
 func TestExecuteTest(t *testing.T) {
@@ -100,6 +107,7 @@ func TestExecuteTest(t *testing.T) {
 			Url:    "/users",
 		},
 		Setup:           func(testCase *TestCase) {},
+		Teardown:        func(testCase *TestCase, res *HijackableResponseRecorder) {},
 		RequestBody:     u,
 		RequestCookies:  []*http.Cookie{adminRefreshCookie},
 		RequestHeaders:  map[string]string{"test-header": "header"},
@@ -110,22 +118,27 @@ func TestExecuteTest(t *testing.T) {
 			BodyParts:        []string{"Not Found"},
 			BodyPartMissing:  "This is Not Returned",
 			BodyPartsMissing: []string{"This is Not Returned"},
+			Headers:          map[string]string{"Content-Type": "application/json"},
 		},
 	}
 	e := echo.New()
 	ExecuteTest(t, e, tc)
 
 }
+func TestGenerateRequest_BadData(t *testing.T) {
 
-//func TestExecuteTest_error(t *testing.T) {
-//	tc := &TestCase{
-//		TestName: "Can create User",
-//		Request: Request{
-//			Method: http.MethodPost,
-//			Url:    "/users",
-//		},
-//		RequestBody: func() {}, // You can't marshal a function
-//	}
-//	e := echo.New()
-//	ExecuteTest(t, e, tc)
-//}
+	tc := &TestCase{
+		TestName: "Can create User",
+		Request: Request{
+			Method: http.MethodPost,
+			Url:    "/users",
+		},
+		RequestBody: func() {},
+	}
+
+	_, err := GenerateRequest(tc)
+	if err == nil {
+		t.Fatal("Expecting error for bad data.")
+	}
+
+}
