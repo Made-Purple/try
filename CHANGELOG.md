@@ -4,7 +4,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [staging]
 ### Added
-- Added a default user agent in, which cna be overriten by the headers in a test case
+- Added a default user agent in, which can be overridden by the headers in a test case.
+### Changed
+- Changed the header from HeaderXRealIP to HeaderXForwardedFor in the generate request.
 
 ## [1.1.1] - 2026-01-13 (96.2%)
 ### Fixed

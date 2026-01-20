@@ -66,7 +66,7 @@ func GenerateRequest(testCase *TestCase) (*http.Request, error) {
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	}
 	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36")
-	req.Header.Set(echo.HeaderXRealIP, "127.0.0.0")
+	req.Header.Set(echo.HeaderXForwardedFor, "127.0.0.0")
 
 	// Add cookies in if present
 	if len(testCase.RequestCookies) > 0 {
